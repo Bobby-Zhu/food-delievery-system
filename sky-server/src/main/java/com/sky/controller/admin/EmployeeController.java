@@ -40,8 +40,6 @@ public class EmployeeController {
     private EmployeeService employeeService;
     @Autowired
     private JwtProperties jwtProperties;
-    @Autowired
-    private EmployeeMapper employeeMapper;
 
     /**
      * 登录
