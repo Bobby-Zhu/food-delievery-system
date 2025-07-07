@@ -30,3 +30,7 @@ sky:
     admin-secret-key: itcast
     admin-ttl: 720000000
     admin-token-name: token
+  aws-s3:
+    region: us-east-1
+    bucket-name: sky-take-out-files
+
