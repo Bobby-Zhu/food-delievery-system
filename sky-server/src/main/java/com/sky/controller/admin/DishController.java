@@ -23,6 +23,13 @@ public class DishController {
     @Autowired
     private DishService dishService;
 
+    @GetMapping("/list")
+    @ApiOperation("根据分类id查询菜品")
+    public Result<List<Dish>> list(@RequestParam Long categoryId) {
+        List<Dish> list = dishService.list(categoryId);
+        return Result.success(list);
+    }
+
     @PostMapping
     @ApiOperation("新增菜品")
     public Result saveWithFlavor(@RequestBody DishDTO dishDTO) {
@@ -60,4 +67,6 @@ public class DishController {
         dishService.updateWithFlavor(dishDTO);
         return Result.success();
     }
+
+
 }
