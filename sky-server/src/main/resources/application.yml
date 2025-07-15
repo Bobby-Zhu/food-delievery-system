@@ -34,7 +34,15 @@ sky:
     admin-secret-key: itcast
     admin-ttl: 720000000
     admin-token-name: token
+    user-secret-key: itcast
+    user-ttl: 720000000
+    user-token-name: authentication
   aws-s3:
     region: us-east-1
     bucket-name: sky-take-out-files
+
+  wechat:
+    appid: ${WECHAT_APPID}
+    secret: ${WECHAT_SECRET}
+
 
