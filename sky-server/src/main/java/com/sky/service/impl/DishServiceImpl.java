@@ -36,6 +36,7 @@ public class DishServiceImpl implements DishService {
     @Autowired
     private SetMealDishMapper setmealDishMapper;
 
+    @Transactional
     public void saveWithFlavor(DishDTO dishDTO){
         Dish dish = new Dish();
         BeanUtils.copyProperties(dishDTO,dish);
@@ -90,7 +91,7 @@ public class DishServiceImpl implements DishService {
         dishVO.setFlavors(dishFlavors);
         return dishVO;
     }
-
+    @Transactional
     public void updateWithFlavor(DishDTO dishDTO){
         Dish dish = new Dish();
         BeanUtils.copyProperties(dishDTO,dish);
