@@ -31,10 +31,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.sky.controller.user.UserOrderController.orderId;
 
 @Service
 public class OrderServiceImpl implements OrderService {
+    public static Long orderId;
     @Autowired
     private OrderMapper orderMapper;
 
@@ -80,7 +80,7 @@ public class OrderServiceImpl implements OrderService {
         order.setNumber(String.valueOf(System.currentTimeMillis()));
 
         orderMapper.insert(order);
-
+        orderId = order.getId();
         List<OrderDetail> orderDetailList = new ArrayList<>();
         for (ShoppingCart cart:shoppingCarts){
             OrderDetail orderDetail = new OrderDetail();
@@ -136,7 +136,6 @@ public class OrderServiceImpl implements OrderService {
         // 发现没有将支付时间 check_out属性赋值，所以在这里更新
 
         LocalDateTime check_out_time = LocalDateTime.now();
-
         orderMapper.updateStatus(OrderStatus, OrderPaidStatus, check_out_time, orderId);
         return vo;
     }
@@ -192,6 +191,44 @@ public class OrderServiceImpl implements OrderService {
         BeanUtils.copyProperties(order,orderVO);
         orderVO.setOrderDetailList(orderDetail);
         return orderVO;
+    }
+
+
+    public void cancel(Long id) {
+        Orders order = orderMapper.getById(id);
+
+        // 校验订单是否存在
+        if (order == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        //订单状态 1待付款 2待接单 3已接单 4派送中 5已完成 6已取消
+        if (order.getStatus() > 2) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        Orders updated_order = new Orders();
+        updated_order.setId(order.getId());
+
+        // 订单处于待接单状态下取消，需要进行退款
+        if (order.getStatus().equals(Orders.TO_BE_CONFIRMED)) {
+            //调用微信支付退款接口
+//            weChatPayUtil.refund(
+//                    order.getNumber(), //商户订单号
+//                    order.getNumber(), //商户退款单号
+//                    new BigDecimal(0.01),//退款金额，单位 元
+//                    new BigDecimal(0.01));//原订单金额
+
+            //支付状态修改为 退款
+            updated_order.setPayStatus(Orders.REFUND);
+        }
+
+        // 更新订单状态、取消原因、取消时间
+        updated_order.setStatus(Orders.CANCELLED);
+        updated_order.setCancelReason("用户取消");
+        updated_order.setCancelTime(LocalDateTime.now());
+        orderMapper.update(updated_order);
+
     }
 
 }

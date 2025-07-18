@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/user/order")
 @Slf4j
 public class UserOrderController {
-    public static Long orderId;
+
     @Autowired
     OrderService orderService;
 
@@ -42,7 +42,6 @@ public class UserOrderController {
     public Result<OrderPaymentVO> payment(@RequestBody OrdersPaymentDTO ordersPaymentDTO) throws Exception {
         log.info("订单支付：{}", ordersPaymentDTO);
         OrderPaymentVO orderPaymentVO = orderService.payment(ordersPaymentDTO);
-        log.info("生成预支付交易单：{}", orderPaymentVO);
         return Result.success(orderPaymentVO);
     }
 
@@ -59,5 +58,13 @@ public class UserOrderController {
         log.info("查询订单详情:{}", id);
         OrderVO orderVO = orderService.details(id);
         return Result.success(orderVO);
+    }
+
+    @PutMapping("/cancel/{id}")
+    @ApiOperation("取消订单")
+    public Result cancel(@PathVariable Long id) {
+        log.info("取消订单:{}", id);
+        orderService.cancel(id);
+        return Result.success();
     }
 }
