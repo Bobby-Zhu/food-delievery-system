@@ -358,4 +358,64 @@ public class OrderServiceImpl implements OrderService {
                 .build();
         orderMapper.update(updated_order);
     }
+
+    public void cancelAdmin(OrdersCancelDTO ordersCancelDTO) {
+        Orders order = orderMapper.getById(ordersCancelDTO.getId());
+        if (order.getPayStatus() == Orders.PAID) {
+            log.info("申请退款：{}, 总共：{}", order.getId(), order.getStatus());
+        }
+        Orders updated_order = Orders.builder()
+                .id(order.getId())
+                .cancelReason(ordersCancelDTO.getCancelReason())
+                .status(Orders.CANCELLED)
+                .payStatus(Orders.REFUND)
+                .cancelTime(LocalDateTime.now())
+                .build();
+        orderMapper.update(updated_order);
+    }
+
+    /**
+     * 派送订单
+     *
+     * @param id
+     */
+    public void delivery(Long id) {
+        // 根据id查询订单
+        Orders ordersDB = orderMapper.getById(id);
+
+        // 校验订单是否存在，并且状态为3
+        if (ordersDB == null || !ordersDB.getStatus().equals(Orders.CONFIRMED)) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        Orders orders = new Orders();
+        orders.setId(ordersDB.getId());
+        // 更新订单状态,状态转为派送中
+        orders.setStatus(Orders.DELIVERY_IN_PROGRESS);
+
+        orderMapper.update(orders);
+    }
+
+    /**
+     * 完成订单
+     *
+     * @param id
+     */
+    public void complete(Long id) {
+        // 根据id查询订单
+        Orders ordersDB = orderMapper.getById(id);
+
+        // 校验订单是否存在，并且状态为4
+        if (ordersDB == null || !ordersDB.getStatus().equals(Orders.DELIVERY_IN_PROGRESS)) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        Orders orders = new Orders();
+        orders.setId(ordersDB.getId());
+        // 更新订单状态,状态转为完成
+        orders.setStatus(Orders.COMPLETED);
+        orders.setDeliveryTime(LocalDateTime.now());
+
+        orderMapper.update(orders);
+    }
 }
